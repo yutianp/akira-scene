@@ -1,16 +1,179 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 	<head>
+		<title>three.js webgl - glTF loader</title>
 		<meta charset="utf-8">
-		<title>threejs test</title>
-		<link rel="stylesheet" href="./assets/css/main.css">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="./assets/css/main.css">
 	</head>
+
 	<body>
-		Hello world!
 
+		<script type="module">
 
-		
+			import * as THREE from './assets/js/three.module.js';
 
-		<script src="./assets/js/three.js"></script>
+/*//*/import { OrbitControls } from './assets/jsm/controls/OrbitControls.js';
+			import { GLTFLoader } from './assets/jsm/loaders/GLTFLoader.js';
+			import { RGBELoader } from './assets/jsm/loaders/RGBELoader.js';
+			import { RoughnessMipmapper } from './assets/jsm/utils/RoughnessMipmapper.js';
+
+			var container,/*//*/ controls;
+			var camera, scene, renderer;
+
+/*			var mesh;
+
+			var mouseX = 0;
+			var mouseY = 0;
+
+			var targetX = 0;
+			var targetY = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+*/
+			init();
+			//render();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
+/*//*/				camera.position.set( 0, 0, 0);
+
+				scene = new THREE.Scene();
+
+				new RGBELoader()
+					.setDataType( THREE.UnsignedByteType )
+					.setPath( 'textures/equirectangular/' )
+					.load( 'studio_small_04_4k.hdr', function ( texture ) {
+
+						var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+
+						//scene.background = envMap;
+						scene.environment = envMap;
+
+						texture.dispose();
+						pmremGenerator.dispose();
+
+						render();
+
+						// model
+
+						// use of RoughnessMipmapper is optional
+						var roughnessMipmapper = new RoughnessMipmapper( renderer );
+
+						var loader = new GLTFLoader().setPath( 'models/pills/glTF/' );
+						loader.load( 'pill.gltf', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+									// roughnessMipmapper.generateMipmaps( child.material );
+
+								}
+
+							} );
+
+							scene.add( gltf.scene );
+
+							roughnessMipmapper.dispose();
+
+							render();
+
+						} );
+
+					} );
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.toneMapping = THREE.ACESFilmicToneMapping;
+				renderer.toneMappingExposure = 1;
+				renderer.outputEncoding = THREE.sRGBEncoding;
+				container.appendChild( renderer.domElement );
+
+				var pmremGenerator = new THREE.PMREMGenerator( renderer );
+				pmremGenerator.compileEquirectangularShader();
+///*
+				controls = new OrbitControls( camera, renderer.domElement );
+				// controls.addEventListener( 'change', render ); // use if there is no animation loop
+				controls.minDistance = 2;
+				controls.maxDistance = 2;
+				controls.target.set( 0, 0, - 0.2 );
+				controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+				controls.dampingFactor = 0.005;
+				controls.update();
+//*/
+//				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+/*
+			function createScene( geometry, scale, material ) {
+
+							mesh = new THREE.Mesh( geometry, material );
+
+							mesh.position.y = - 50;
+							mesh.scale.set( scale, scale, scale );
+
+							mesh.castShadow = true;
+							mesh.receiveShadow = true;
+
+							scene.add( mesh );
+
+						}
+*/
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+/*//*/				render();
+
+			}
+
+/*			function onDocumentMouseMove( event ) {
+
+					mouseX = ( event.clientX - windowHalfX );
+					mouseY = ( event.clientY - windowHalfY );
+
+			}
+*/
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+/*//*/				controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+
+/*//*/				render();
+
+			}
+
+			function render() {
+
+/*				targetX = mouseX * .001;
+				targetY = mouseY * .001;
+
+				if ( mesh ) {
+
+					mesh.rotation.y += 0.05 * ( targetX - mesh.rotation.y );
+					mesh.rotation.x += 0.05 * ( targetY - mesh.rotation.x );
+
+				}
+*/
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
 	</body>
 </html>
