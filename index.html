@@ -8,52 +8,41 @@
 	</head>
 
 	<body>
-
+		<!-- <canvas id="pills" width="200" height="200"></canvas> -->
 		<script type="module">
-
 			import * as THREE from './assets/js/three.module.js';
 
-/*//*/import { OrbitControls } from './assets/jsm/controls/OrbitControls.js';
+			import { OrbitControls } from './assets/jsm/controls/OrbitControls.js';
 			import { GLTFLoader } from './assets/jsm/loaders/GLTFLoader.js';
 			import { RGBELoader } from './assets/jsm/loaders/RGBELoader.js';
 			import { RoughnessMipmapper } from './assets/jsm/utils/RoughnessMipmapper.js';
 
-			var container,/*//*/ controls;
+			var container, controls;
 			var camera, scene, renderer;
 
-/*			var mesh;
+			const scenes = [];
 
-			var mouseX = 0;
-			var mouseY = 0;
-
-			var targetX = 0;
-			var targetY = 0;
-
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
-*/
 			init();
 			//render();
 			animate();
 
 			function init() {
-
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
-/*//*/				camera.position.set( 0, 0, 0);
+				camera.position.set( 0, 0, 0);
 
 				scene = new THREE.Scene();
 
 				new RGBELoader()
 					.setDataType( THREE.UnsignedByteType )
 					.setPath( 'textures/equirectangular/' )
-					.load( 'studio_small_04_4k.hdr', function ( texture ) {
+					.load( 'hdrired.hdr', function ( texture ) {
 
 						var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 
-						//scene.background = envMap;
+						scene.background = envMap;
 						scene.environment = envMap;
 
 						texture.dispose();
@@ -62,33 +51,46 @@
 						render();
 
 						// model
-
 						// use of RoughnessMipmapper is optional
 						var roughnessMipmapper = new RoughnessMipmapper( renderer );
 
 						var loader = new GLTFLoader().setPath( 'models/pills/glTF/' );
-						loader.load( 'pill.gltf', function ( gltf ) {
-
+						loader.load( 'pills.gltf', function ( gltf ) {
 							gltf.scene.traverse( function ( child ) {
-
 								if ( child.isMesh ) {
-
 									// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
 									// roughnessMipmapper.generateMipmaps( child.material );
-
 								}
-
-							} );
-
+							});
 							scene.add( gltf.scene );
-
 							roughnessMipmapper.dispose();
-
 							render();
-
-						} );
-
-					} );
+						});
+						var loader = new GLTFLoader().setPath( 'models/pills/glTF/' );
+						loader.load( 'bike.gltf', function ( gltf ) {
+							gltf.scene.traverse( function ( child ) {
+								if ( child.isMesh ) {
+									// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+									// roughnessMipmapper.generateMipmaps( child.material );
+								}
+							});
+							scene.add( gltf.scene );
+							roughnessMipmapper.dispose();
+							render();
+						});
+						var loader = new GLTFLoader().setPath( 'models/pills/glTF/' );
+						loader.load( 'building.gltf', function ( gltf ) {
+							gltf.scene.traverse( function ( child ) {
+								if ( child.isMesh ) {
+									// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+									// roughnessMipmapper.generateMipmaps( child.material );
+								}
+							});
+							scene.add( gltf.scene );
+							roughnessMipmapper.dispose();
+							render();
+						});
+					});
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -100,80 +102,45 @@
 
 				var pmremGenerator = new THREE.PMREMGenerator( renderer );
 				pmremGenerator.compileEquirectangularShader();
-///*
+
 				controls = new OrbitControls( camera, renderer.domElement );
 				// controls.addEventListener( 'change', render ); // use if there is no animation loop
-				controls.minDistance = 2;
-				controls.maxDistance = 2;
+				controls.minDistance = 0;
+				controls.maxDistance = 3;
 				controls.target.set( 0, 0, - 0.2 );
 				controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-				controls.dampingFactor = 0.005;
+				controls.dampingFactor = 0.01;
 				controls.update();
-//*/
-//				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				camera.position.set( 0, 0, 1.5);
+
+				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				window.addEventListener( 'resize', onWindowResize, false );
 
+				scene.userData.camera = camera;
+				scene.userData.controls = controls;
+				scenes.push( scene );
 			}
-/*
-			function createScene( geometry, scale, material ) {
 
-							mesh = new THREE.Mesh( geometry, material );
-
-							mesh.position.y = - 50;
-							mesh.scale.set( scale, scale, scale );
-
-							mesh.castShadow = true;
-							mesh.receiveShadow = true;
-
-							scene.add( mesh );
-
-						}
-*/
 			function onWindowResize() {
-
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
-
 				renderer.setSize( window.innerWidth, window.innerHeight );
-
-/*//*/				render();
-
+				render();
 			}
 
-/*			function onDocumentMouseMove( event ) {
-
-					mouseX = ( event.clientX - windowHalfX );
-					mouseY = ( event.clientY - windowHalfY );
-
-			}
-*/
 			function animate() {
-
 				requestAnimationFrame( animate );
-
-/*//*/				controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
-
-/*//*/				render();
-
+				controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+				render();
 			}
 
 			function render() {
 
-/*				targetX = mouseX * .001;
-				targetY = mouseY * .001;
-
-				if ( mesh ) {
-
-					mesh.rotation.y += 0.05 * ( targetX - mesh.rotation.y );
-					mesh.rotation.x += 0.05 * ( targetY - mesh.rotation.x );
-
-				}
-*/
-				renderer.render( scene, camera );
-
+				scenes.forEach( function ( scene ) {
+					renderer.render( scene, camera );
+				});
 			}
 
 		</script>
-
 	</body>
 </html>
